@@ -1,7 +1,6 @@
 
-# Script that should be executed once before the Spawner spawns the jupyter-notebook
-# for one user for the first time.
-
+# Specify BootstrapScriptRunner as your bootstrap runner.
+# Defaults to BootstrapNone which actually does nothing at all.
 c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapScriptRunner"
 
 # If there's something weird, in your neighborhood...
