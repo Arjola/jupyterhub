@@ -13,21 +13,75 @@ writeable by user jovyan inside of the container
 Another use case could be that every newly spawned notebook should come with initial content that you'd like to 
 copy into the user's space.
 
-Here's the bootstrap process to the rescue!
+**Here's the bootstrap process to the rescue!**
 
 ## NoBootstrap
 
-This is the default bootstrap impementation which does nothing at all. 
+This is the default bootstrap implementation which does nothing at all. 
 
     # This is the default value
     c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapNone"
 
 ## BootstrapScriptRunner
 
-Here you can specify a plain old shell script to be executed by the bootstrap process.
-The first parameter passed to your script is the name of the user.
+You can specify a plain ole' shell script (or any other executable) to be run 
+by the bootstrap process.
 
-    # Specify which script to run as bootstrap process
-    c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapScriptRunnter"
+The first and only parameter passed to your executable script is the name of the user.
+
+    # Select BootstrapScriptRunner and specify which script to run as bootstrap process
+    c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapScriptRunner"
     c.BootstrapScriptRunner.script = "./myscripts/bootstrap-jupyter.sh"
 
+Make sure that the script is *idempotent*. It will be executed every time 
+a notebook server is spawned to the user. That means you should somehow 
+make sure that things that should run only once are not run again and again.
+
+For example, before you create a directory, check if it exists.
+
+Here's an example on what you could do:
+
+    #!/bin/bash
+    
+    # Bootstrap example script
+    # Copyright (c) Jupyter Development Team.
+    # Distributed under the terms of the Modified BSD License.
+    
+    # Do not change the following:
+    # - The first parameter for the Bootstrap Script is the USER.
+    USER=$1
+    if [$USER == ""]; then
+        exit 1
+    fi
+    # ----------------------------------------------------------------------------
+    
+    
+    # This example script will do the following:
+    # - create one directory for the user $USER in a BASE_DIRECTORY (see below)
+    # - create a "tutorials" directory within and download and unzip the PythonDataScienceHandbook from GitHub
+    
+    # Start the Bootstrap Process
+    echo "bootstrap process running for user $USER ..."
+    
+    # Base Directory: All Directories for the user will be below this point
+    BASE_DIRECTORY=/volumes/jupyterhub/
+    
+    # User Directory: That's the private directory for the user to be created, if none exists
+    USER_DIRECTORY=$BASE_DIRECTORY/$USER
+    
+    if [ -d "$USER_DIRECTORY" ]; then
+        echo "...directory for user already exists. skipped"
+        exit 0 # all good. nothing to do.
+    else
+        echo "...creating a directory for the user: $USER_DIRECTORY"
+        mkdir $USER_DIRECTORY
+    
+        echo "...initial content loading for user ..."
+        mkdir $USER_DIRECTORY/tutorials
+        cd $USER_DIRECTORY/tutorials
+        wget https://github.com/jakevdp/PythonDataScienceHandbook/archive/master.zip
+        unzip master.zip
+        rm master.zip
+    fi
+    
+    exit 0
