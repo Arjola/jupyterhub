@@ -38,8 +38,15 @@ a notebook server is spawned to the user. That means you should somehow
 make sure that things that should run only once are not run again and again.
 
 For example, before you create a directory, check if it exists.
+ 
+The Bootstrap process will not wait forever. Specify a timeout or live with the default
+value of 120 seconds:
 
-Here's an example on what you could do:
+    # Timeout in seconds for script. Defaults to 120 seconds
+    c.BootstrapScriptRunner.execution_timeout = 60
+
+Here's an example on what you could do in your shell script. See also 
+/examples/bootstrap-script/
 
     #!/bin/bash
     
