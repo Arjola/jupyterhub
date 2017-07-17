@@ -2,12 +2,9 @@
 # Copyright (c) IPython Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from traitlets import Unicode, Bool, Integer
+from traitlets import Unicode, Bool
 from traitlets.config import LoggingConfigurable
 
-
-class BootstrapException(Exception):
-    pass
 
 class Bootstrap(LoggingConfigurable):
     """
@@ -55,6 +52,7 @@ class Bootstrap(LoggingConfigurable):
         self.spawner = spawner
         super().__init__(**kwargs)
 
+
     def _bootstrap_can_run(self):
         return True
 
@@ -62,14 +60,9 @@ class Bootstrap(LoggingConfigurable):
         if (self._bootstrap_can_run()):
             try:
                 self.log.info("bootstrap for user {username}".format(username=self.user.name))
-                strapped = self.bootstrap()
-                if (not strapped and not self.ignore_errors):
-                    raise BootstrapException("bootstrap failed, error cannot be ignored.")
-
-            except Exception as e:
+                return self.bootstrap()
+            except Exception:
                 self.log.error("bootstrap process failed for user {username}".format(username=self.user.name))
-                if (not self.ignore_errors):
-                    raise BootstrapException("bootstrap failed with exception, cannot be ignored.") from e
                 return False
         else:
             return True
@@ -100,18 +93,10 @@ class BootstrapScriptRunner(Bootstrap):
         """
     ).tag(config=True)
 
-    execution_timeout = Integer(
-        120,
-        help="""
-        Timeout in seconds to wait for the script to terminate
-        """
-    ).tag(config=True)
-
     def bootstrap(self):
         self.log.debug("starting configured script {scriptname}".format(scriptname=self.script))
         try:
             handle = Popen([self.script, self.user.name])
-            handle.wait(timeout=self.execution_timeout)
             return handle.returncode == 0
         except FileNotFoundError as f:
             self.log.error("Configured script file not found for BootstrapScriptRunner.")
