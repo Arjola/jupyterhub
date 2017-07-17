@@ -296,11 +296,6 @@ class User(HasTraits):
         if (authenticator):
             yield gen.maybe_future(authenticator.pre_spawn_start(self, spawner))
 
-        # trigger bootstrap process
-        bootstrap = self.bootstrap
-        if (bootstrap):
-            yield gen.maybe_future(bootstrap.bootstrap())
-
         self.spawn_pending = True
         # wait for spawner.start to return
         try:
