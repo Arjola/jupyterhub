@@ -15,7 +15,7 @@ copy into the user's space.
 
 **Here's the bootstrap process to the rescue!**
 
-## NoBootstrap
+## BootstrapNone
 
 This is the default bootstrap implementation which does nothing at all. 
 
