@@ -20,7 +20,7 @@ fi
 echo "bootstrap process running for user $USER ..."
 
 # Base Directory: All Directories for the user will be below this point
-BASE_DIRECTORY=/home/danny/jupyterhub/
+BASE_DIRECTORY=/volumes/jupyterhub/
 
 # User Directory: That's the private directory for the user to be created, if none exists
 USER_DIRECTORY=$BASE_DIRECTORY/$USER
