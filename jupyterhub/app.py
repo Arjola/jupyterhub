@@ -63,6 +63,7 @@ from .utils import (
 # classes for config
 from .auth import Authenticator, PAMAuthenticator
 from .spawner import Spawner, LocalProcessSpawner
+from .bootstrap import Bootstrap, BootstrapNone
 from .objects import Hub
 
 # For faking stats
@@ -359,7 +360,7 @@ class JupyterHub(Application):
     proxy_cmd = Command([], config=True,
         help="DEPRECATED. Use ConfigurableHTTPProxy.command",
     ).tag(config=True)
-    
+
     debug_proxy = Bool(False,
         help="DEPRECATED: Use ConfigurableHTTPProxy.debug",
     ).tag(config=True)
@@ -520,16 +521,28 @@ class JupyterHub(Application):
     @default('authenticator')
     def _authenticator_default(self):
         return self.authenticator_class(parent=self, db=self.db)
-    
+
     allow_multiple_servers = Bool(False,
         help="Allow multiple single-server per user"
     ).tag(config=True)
-    
+
     # class for spawning single-user servers
     spawner_class = Type(LocalProcessSpawner, Spawner,
         help="""The class to use for spawning single-user servers.
 
         Should be a subclass of Spawner.
+        """
+    ).tag(config=True)
+
+    bootstrap_class = Type(
+        BootstrapNone,
+        Bootstrap,
+        help="""
+        Specify a bootstrap strategy which implements a setup process
+        to be run before the jupyter notebook is spawned.
+        Default is no bootstrap strategy.
+        
+        Should be a subclass of Bootstrap.
         """
     ).tag(config=True)
 
@@ -591,7 +604,8 @@ class JupyterHub(Application):
         """
     ).tag(config=True)
 
-    cleanup_proxy = Bool(True,
+    cleanup_proxy = Bool(
+        True,
         help="""Whether to shutdown the proxy when the Hub shuts down.
 
         Disable if you want to be able to teardown the Hub while leaving the proxy running.
@@ -1222,6 +1236,7 @@ class JupyterHub(Application):
             admin_access=self.admin_access,
             authenticator=self.authenticator,
             spawner_class=self.spawner_class,
+            bootstrap_class=self.bootstrap_class,
             base_url=self.base_url,
             cookie_secret=self.cookie_secret,
             cookie_max_age_days=self.cookie_max_age_days,
@@ -1473,7 +1488,7 @@ class JupyterHub(Application):
                         break
                 else:
                     self.log.error("Cannot connect to %s service %s at %s. Is it running?", service.kind, service_name, service.url)
-        
+
         yield self.proxy.check_routes(self.users, self._service_map)
 
 
