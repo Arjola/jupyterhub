@@ -20,7 +20,7 @@ fi
 echo "bootstrap process running for user $USER ..."
 
 # Base Directory: All Directories for the user will be below this point
-BASE_DIRECTORY=/volumes/jupyterhub/
+BASE_DIRECTORY=/volumes/jupyterhub
 
 # User Directory: That's the private directory for the user to be created, if none exists
 USER_DIRECTORY=$BASE_DIRECTORY/$USER
@@ -32,11 +32,16 @@ else
     echo "...creating a directory for the user: $USER_DIRECTORY"
     mkdir $USER_DIRECTORY
 
+    # mkdir did not succeed?
+    if [ $? -ne 0 ] ; then
+        exit 1
+    fi
+
     echo "...initial content loading for user ..."
     mkdir $USER_DIRECTORY/tutorials
     cd $USER_DIRECTORY/tutorials
     wget https://github.com/jakevdp/PythonDataScienceHandbook/archive/master.zip
-    unzip master.zip
+    unzip -o master.zip
     rm master.zip
 fi
 
