@@ -1,7 +1,7 @@
 # Bootstrap Process
 
-Before starting a notebook for the user, it could be useful to 
-start some bootstrap process beforehand.
+Before spawning a notebook to the user, it could be useful to 
+do some preparation work in a bootstrapping process.
 
 One common use case is at follows:
 
