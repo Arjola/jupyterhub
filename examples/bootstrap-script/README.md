@@ -68,6 +68,7 @@ For example, before you create a directory, check if it exists.
 Here's an example on what you could do in your shell script. See also 
 /examples/bootstrap-script/
 
+```bash
     #!/bin/bash
     
     # Bootstrap example script
@@ -107,8 +108,9 @@ Here's an example on what you could do in your shell script. See also
         mkdir $USER_DIRECTORY/tutorials
         cd $USER_DIRECTORY/tutorials
         wget https://github.com/jakevdp/PythonDataScienceHandbook/archive/master.zip
-        unzip master.zip
+        unzip -o master.zip
         rm master.zip
     fi
     
     exit 0
+```
