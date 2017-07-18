@@ -357,6 +357,16 @@ class Spawner(LoggingConfigurable):
         the spawner starts. For example, create a directory for your user or load initial content.
         
         This can be set independent of any concrete spawner implementation.
+        
+        Example:
+        
+        from subprocess import check_call
+        def my_hook(spawner):
+            username = spawner.user.name
+            check_call(['./examples/bootstrap-script/bootstrap.sh', username])
+
+        c.Spawner.pre_spawn_hook = my_hook
+        
         """
     ).tag(config=True)
 
@@ -536,17 +546,6 @@ class Spawner(LoggingConfigurable):
     def run_pre_spawn_hook(self):
         """
         run a pre spawn hook function which you can define in your jupyter_config.py
-        you can do whatever python allows you to do.
-
-        example:
-
-        from subprocess import check_call
-        def my_hook(spawner):
-            username = spawner.user.name
-            check_call(['./examples/bootstrap-script/bootstrap.sh', username])
-
-        c.Spawner.pre_spawn_hook = my_hook
-
         :return: void
         """
         if (callable(self.pre_spawn_hook)):
