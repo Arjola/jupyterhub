@@ -536,6 +536,7 @@ class Spawner(LoggingConfigurable):
     def run_pre_spawn_hook(self):
         """
         run a pre spawn hook function which you can define in your jupyter_config.py
+        you can do whatever python allows you to do.
 
         example:
 
