@@ -1,4 +1,4 @@
-# Bootstrap Process
+# Bootstrapping your users
 
 Before spawning a notebook to the user, it could be useful to 
 do some preparation work in a bootstrapping process.
@@ -13,37 +13,57 @@ writeable by user jovyan inside of the container
 Another use case could be that every newly spawned notebook should come with initial content that you'd like to 
 copy into the user's space.
 
-**Here's the bootstrap process to the rescue!**
+You can define your own bootstrap process by implementing a pre_spawn_hook on the Spawner.
+You hook gets the Spawner as parameter and you can easily get the contextual information out of the spawning process. See examples:
 
-## BootstrapNone
+    
+### Example #1 - Create a directory for the user
 
-This is the default bootstrap implementation which does nothing at all. 
+Create a directory for the user, if none exists
 
-    # This is the default value
-    c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapNone"
+```python
 
-## BootstrapScriptRunner
+# in jupyter_config.py  
+import os
+def create_dir_hook(spawner):
+    username = spawner.user.name # get the username
+    volume_path = os.path.join('/volumes/jupyterhub', username)
+    if not os.path.exists(volume_path):
+        os.mkdir(volume_path, 0o755)
+        # now do whatever you think your user needs
+        # ...
+        pass
+
+# attach the hook function to the spawner
+c.Spawner.pre_spawn_hook = create_dir_hook
+```
+
+### Example #2 - Run a shell script 
 
 You can specify a plain ole' shell script (or any other executable) to be run 
 by the bootstrap process.
 
-The first and only parameter passed to your executable script is the name of the user.
+For example, you can execute a shell script and as first parameter pass the name 
+of the user:
 
-    # Select BootstrapScriptRunner and specify which script to run as bootstrap process
-    c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapScriptRunner"
-    c.BootstrapScriptRunner.script = "./myscripts/bootstrap-jupyter.sh"
+```python
 
-Make sure that the script is *idempotent*. It will be executed every time 
+# in jupyter_config.py    
+from subprocess import check_call
+def my_script_hook(spawner):
+    username = spawner.user.name # get the username
+    check_call(['./examples/bootstrap-script/bootstrap.sh', username])
+
+# attach the hook function to the spawner
+c.Spawner.pre_spawn_hook = my_script_hook
+
+```
+
+If you do this, make sure that the script is *idempotent*. It will be executed every time 
 a notebook server is spawned to the user. That means you should somehow 
 make sure that things that should run only once are not run again and again.
 
 For example, before you create a directory, check if it exists.
- 
-The Bootstrap process will not wait forever. Specify a timeout or live with the default
-value of 120 seconds:
-
-    # Timeout in seconds for script. Defaults to 120 seconds
-    c.BootstrapScriptRunner.execution_timeout = 60
 
 Here's an example on what you could do in your shell script. See also 
 /examples/bootstrap-script/
