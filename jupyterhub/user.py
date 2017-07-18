@@ -16,7 +16,6 @@ from ._version import _check_version, __version__
 from .objects import Server
 from traitlets import HasTraits, Any, Dict, observe, default
 from .spawner import LocalProcessSpawner
-from .bootstrap import BootstrapNone
 
 class UserDict(dict):
     """Like defaultdict, but for users
@@ -122,11 +121,6 @@ class User(HasTraits):
     def spawner_class(self):
         return self.settings.get('spawner_class', LocalProcessSpawner)
 
-    @property
-    def bootstrap_class(self):
-        return self.settings.get('bootstrap_class', BootstrapNone)
-
-
     def __init__(self, orm_user, settings=None, **kwargs):
         if settings:
             kwargs['settings'] = settings
@@ -146,10 +140,7 @@ class User(HasTraits):
             config=self.settings.get('config'),
         )
 
-        self.bootstrap = self.bootstrap_class(user=self, spawner=self.spawner, config=self.settings.get('config'))
-
     # pass get/setattr to ORM user
-
     def __getattr__(self, attr):
         if hasattr(self.orm_user, attr):
             return getattr(self.orm_user, attr)
@@ -285,11 +276,6 @@ class User(HasTraits):
                                         url_path_join(self.url, 'oauth_callback'),
                                         )
         db.commit()
-
-        # trigger bootstrap process
-        bootstrap = self.bootstrap
-        if (bootstrap):
-            yield gen.maybe_future(bootstrap.run())
 
         # trigger pre-spawn hook on authenticator
         authenticator = self.authenticator
