@@ -1,14 +1,26 @@
+# Example for a Spawner.pre_spawn_hook
+# create a directory for the user before the spawner starts
 
-# Specify BootstrapScriptRunner as your bootstrap runner.
-# Defaults to BootstrapNone which actually does nothing at all.
-c.JupyterHub.bootstrap_class = "jupyterhub.bootstrap.BootstrapScriptRunner"
+import os
+def create_dir_hook(spawner):
+    username = spawner.user.name # get the username
+    volume_path = os.path.join('/volumes/jupyterhub', username)
+    if not os.path.exists(volume_path):
+        os.mkdir(volume_path, 0o755)
+        # now do whatever you think your user needs
+        # ...
 
-# If there's something weird, in your neighborhood...
-# Either ignore the errors and just spawn the server, or raise an exception
-c.Bootstrap.ignore_errors=True
+# attach the hook function to the spawner
+c.Spawner.pre_spawn_hook = create_dir_hook
 
-# Make sure your Bootstrap-Script can be executed again and again.
-c.BootstrapScriptRunner.script = "./examples/bootstrap-script/bootstrap.sh"
+# Use the DockerSpawner to serve your users' notebooks
+c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
+from jupyter_client.localinterfaces import public_ips
+c.JupyterHub.hub_ip = public_ips()[0]
+c.DockerSpawner.hub_ip_connect = public_ips()[0]
+c.DockerSpawner.container_ip = "0.0.0.0"
 
-# Timeout in seconds for script. Defaults to 120 seconds
-c.BootstrapScriptRunner.execution_timeout = 60
+# You can now mount the volume to the docker container as we've
+# made sure the directory exists
+c.DockerSpawner.volumes = { '/volumes/jupyterhub/{username}/': '/home/jovyan/work' }
+
