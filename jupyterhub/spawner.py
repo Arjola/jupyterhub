@@ -550,7 +550,10 @@ class Spawner(LoggingConfigurable):
         :return: void
         """
         if (callable(self.pre_spawn_hook)):
-            self.pre_spawn_hook(self)
+            try:
+                self.pre_spawn_hook(self)
+            except Exception as e:
+                self.log.error("pre_spawn_hook failed", e)
 
     @gen.coroutine
     def start(self):

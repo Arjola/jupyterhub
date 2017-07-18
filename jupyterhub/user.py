@@ -141,7 +141,6 @@ class User(HasTraits):
         )
 
     # pass get/setattr to ORM user
-
     def __getattr__(self, attr):
         if hasattr(self.orm_user, attr):
             return getattr(self.orm_user, attr)
