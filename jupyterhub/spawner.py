@@ -553,7 +553,7 @@ class Spawner(LoggingConfigurable):
             try:
                 self.pre_spawn_hook(self)
             except Exception as e:
-                self.log.error("pre_spawn_hook failed", e)
+                self.log.error("pre_spawn_hook failed with exception: %s", str(e))
 
     @gen.coroutine
     def start(self):
