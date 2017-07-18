@@ -86,7 +86,8 @@ Here's an example on what you could do in your shell script. See also
     
     # This example script will do the following:
     # - create one directory for the user $USER in a BASE_DIRECTORY (see below)
-    # - create a "tutorials" directory within and download and unzip the PythonDataScienceHandbook from GitHub
+    # - create a "tutorials" directory within and download and unzip 
+    #   the PythonDataScienceHandbook from GitHub
     
     # Start the Bootstrap Process
     echo "bootstrap process running for user $USER ..."
