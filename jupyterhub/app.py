@@ -63,6 +63,7 @@ from .utils import (
 # classes for config
 from .auth import Authenticator, PAMAuthenticator
 from .spawner import Spawner, LocalProcessSpawner
+from .bootstrap import Bootstrap, BootstrapNone
 from .objects import Hub
 
 # For faking stats
@@ -530,6 +531,18 @@ class JupyterHub(Application):
         help="""The class to use for spawning single-user servers.
 
         Should be a subclass of Spawner.
+        """
+    ).tag(config=True)
+
+    bootstrap_class = Type(
+        BootstrapNone,
+        Bootstrap,
+        help="""
+        Specify a bootstrap strategy which implements a setup process
+        to be run before the jupyter notebook is spawned.
+        Default is no bootstrap strategy.
+        
+        Should be a subclass of Bootstrap.
         """
     ).tag(config=True)
 
@@ -1223,6 +1236,7 @@ class JupyterHub(Application):
             admin_access=self.admin_access,
             authenticator=self.authenticator,
             spawner_class=self.spawner_class,
+            bootstrap_class=self.bootstrap_class,
             base_url=self.base_url,
             cookie_secret=self.cookie_secret,
             cookie_max_age_days=self.cookie_max_age_days,
