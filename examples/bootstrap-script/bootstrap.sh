@@ -4,7 +4,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-# Do not change the following:
 # - The first parameter for the Bootstrap Script is the USER.
 USER=$1
 if ["$USER" == ""]; then
