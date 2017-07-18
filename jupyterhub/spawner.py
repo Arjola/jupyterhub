@@ -349,6 +349,17 @@ class Spawner(LoggingConfigurable):
         """
     ).tag(config=True)
 
+    pre_spawn_hook = Any(
+        None,
+        allow_none=True,
+        help="""
+        An optional hook function that you can implement to do some bootstrapping work before
+        the spawner starts. For example, create a directory for your user or load initial content.
+        
+        This can be set independent of any concrete spawner implementation.
+        """
+    ).tag(config=True)
+
     def __init__(self, **kwargs):
         super(Spawner, self).__init__(**kwargs)
         if self.user.state:
@@ -521,6 +532,24 @@ class Spawner(LoggingConfigurable):
             args.append('--disable-user-config')
         args.extend(self.args)
         return args
+
+    def run_pre_spawn_hook(self):
+        """
+        run a pre spawn hook function which you can define in your jupyter_config.py
+
+        example:
+
+        from subprocess import check_call
+        def my_hook(spawner):
+            username = spawner.user.name
+            check_call(['./examples/bootstrap-script/bootstrap.sh', username])
+
+        c.Spawner.pre_spawn_hook = my_hook
+
+        :return: void
+        """
+        if (callable(self.pre_spawn_hook)):
+            self.pre_spawn_hook(self)
 
     @gen.coroutine
     def start(self):
