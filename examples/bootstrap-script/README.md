@@ -3,17 +3,26 @@
 Before spawning a notebook to the user, it could be useful to 
 do some preparation work in a bootstrapping process.
 
-One common use case is at follows:
+Common use cases are as follows:
 
-* You are using an LDAPAuthenticator and have no home directory for your user on the host
-* You are using a DockerSpawner and would like to mount a volume, but as no directory exists, docker will create one.
-However, as the docker daemon is running as root, the on-the-fly generated directory for the volume mount will not be
-writeable by user jovyan inside of the container
+*Providing writeable storage for an LDAP user*
 
-Another use case could be that every newly spawned notebook should come with initial content that you'd like to 
-copy into the user's space, such as tutorials or reference material.
+Your Jupyterhub is configured to use the LDAPAuthenticator and DockerSpawer.
 
-You can define your own bootstrap process by implementing a pre_spawn_hook on any spawner.
+* The user has no file directory on the host since your are using LDAP.
+* When a user has no directory and DockerSpawner wants to mount a volume,
+the spawner will use docker to create a directory.
+Since the docker daemon is running as root, the generated directory for the volume 
+mount will not be writeable by the ```jovyan``` user inside of the container. 
+For the directory to be useful to the user, the permissions on the directory 
+need to be modified for the user to have write access.
+
+*Prepopulating Content*
+
+Another use would be to copy initial content, such as tutorial files or reference
+ material, into the user's space when a notebook server is newly spawned.
+
+You can define your own bootstrap process by implementing a ```pre_spawn_hook``` on any spawner.
 The Spawner itself is passed as parameter to your hook and you can easily get the contextual information out of the spawning process. 
 
 If you implement a hook, make sure that it is *idempotent*. It will be executed every time 
@@ -21,9 +30,9 @@ a notebook server is spawned to the user. That means you should somehow
 ensure that things which should run only once are not running again and again.
 For example, before you create a directory, check if it exists.
 
-See examples:
+Bootstrapping examples:
 
-### Example #1 - Create a directory for the user
+### Example #1 - Create a user directory
 
 Create a directory for the user, if none exists
 
@@ -66,7 +75,7 @@ c.Spawner.pre_spawn_hook = my_script_hook
 ```
 
 Here's an example on what you could do in your shell script. See also 
-/examples/bootstrap-script/
+```/examples/bootstrap-script/```
 
 ```bash
 #!/bin/bash
