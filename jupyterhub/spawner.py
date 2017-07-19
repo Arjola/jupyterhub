@@ -545,14 +545,16 @@ class Spawner(LoggingConfigurable):
 
     def run_pre_spawn_hook(self):
         """
-        run a pre spawn hook function which you can define in your jupyter_config.py
+        run a pre spawn hook function which you can define in your jupyterhub_config.py
         :return: void
         """
         if (callable(self.pre_spawn_hook)):
             try:
                 self.pre_spawn_hook(self)
             except Exception as e:
-                self.log.error("pre_spawn_hook failed with exception: %s", str(e))
+                self.log.exception("pre_spawn_hook failed with exception: %s", e)
+                raise e
+        return
 
     @gen.coroutine
     def start(self):

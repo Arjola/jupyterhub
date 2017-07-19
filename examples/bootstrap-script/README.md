@@ -13,7 +13,7 @@ Your Jupyterhub is configured to use the LDAPAuthenticator and DockerSpawer.
 * When a user has no directory and DockerSpawner wants to mount a volume,
 the spawner will use docker to create a directory.
 Since the docker daemon is running as root, the generated directory for the volume 
-mount will not be writeable by the ```jovyan``` user inside of the container. 
+mount will not be writeable by the `jovyan` user inside of the container. 
 For the directory to be useful to the user, the permissions on the directory 
 need to be modified for the user to have write access.
 
@@ -22,7 +22,7 @@ need to be modified for the user to have write access.
 Another use would be to copy initial content, such as tutorial files or reference
  material, into the user's space when a notebook server is newly spawned.
 
-You can define your own bootstrap process by implementing a ```pre_spawn_hook``` on any spawner.
+You can define your own bootstrap process by implementing a `pre_spawn_hook` on any spawner.
 The Spawner itself is passed as parameter to your hook and you can easily get the contextual information out of the spawning process. 
 
 If you implement a hook, make sure that it is *idempotent*. It will be executed every time 
@@ -38,12 +38,15 @@ Create a directory for the user, if none exists
 
 ```python
 
-# in jupyter_config.py  
+# in jupyterhub_config.py  
 import os
 def create_dir_hook(spawner):
     username = spawner.user.name # get the username
     volume_path = os.path.join('/volumes/jupyterhub', username)
     if not os.path.exists(volume_path):
+        # create a directory with umask 0755 
+        # hub and container user must have the same UID to be writeable
+        # still readable by other users on the system
         os.mkdir(volume_path, 0o755)
         # now do whatever you think your user needs
         # ...
@@ -63,11 +66,13 @@ of the user:
 
 ```python
 
-# in jupyter_config.py    
+# in jupyterhub_config.py    
 from subprocess import check_call
+import os
 def my_script_hook(spawner):
     username = spawner.user.name # get the username
-    check_call(['./examples/bootstrap-script/bootstrap.sh', username])
+    script = os.path.join(os.path.dirname(__file__), 'bootstrap.sh')
+    check_call([script, username])
 
 # attach the hook function to the spawner
 c.Spawner.pre_spawn_hook = my_script_hook
