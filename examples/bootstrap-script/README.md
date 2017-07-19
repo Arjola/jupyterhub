@@ -80,7 +80,7 @@ c.Spawner.pre_spawn_hook = my_script_hook
 ```
 
 Here's an example on what you could do in your shell script. See also 
-```/examples/bootstrap-script/```
+`/examples/bootstrap-script/`
 
 ```bash
 #!/bin/bash
