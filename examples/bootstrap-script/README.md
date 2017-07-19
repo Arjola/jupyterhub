@@ -5,7 +5,7 @@ do some preparation work in a bootstrapping process.
 
 Common use cases are:
 
-*Providing writeable storage for an LDAP user*
+*Providing writeable storage for LDAP users*
 
 Your Jupyterhub is configured to use the LDAPAuthenticator and DockerSpawer.
 
