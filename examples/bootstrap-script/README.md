@@ -3,7 +3,7 @@
 Before spawning a notebook to the user, it could be useful to 
 do some preparation work in a bootstrapping process.
 
-Common use cases are as follows:
+Common use cases are:
 
 *Providing writeable storage for an LDAP user*
 
